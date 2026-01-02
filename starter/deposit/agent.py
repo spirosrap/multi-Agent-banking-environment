@@ -16,16 +16,28 @@ with open(instruction_file_path, "r") as f:
   instruction = f.read()
 
 # Set up the tools that we will be using for the root agent
-toolbox_url = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
+toolbox_url = os.environ.get(
+  "DEPOSIT_TOOLBOX_URL",
+  os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5001"),
+)
 print(f"Connecting to Toolbox at {toolbox_url}")
 db_client = ToolboxSyncClient( toolbox_url )
-tools=[
-  # TODO: Add tools here
+tool_names = [
+  "list_accounts_by_customer",
+  "get_account_balance",
+  "list_transactions_by_account",
+  "check_minimum_balance",
 ]
+tools = [db_client.load_tool(name) for name in tool_names]
 
 # Use the Gemini 2.5 Flash model since it performs quickly
 # and handles the processing well.
 model = "gemini-2.5-flash"
 
 # Create our agent
-root_agent = # TODO: create the agent object
+root_agent = Agent(
+  name="deposit_agent",
+  model=model,
+  instruction=instruction,
+  tools=tools,
+)

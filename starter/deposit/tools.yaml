@@ -80,7 +80,7 @@ tools:
       WHERE id = ?
     parameters:
       - name: minimum_balance
-        type: number
+        type: float
         description: Minimum balance to compare against.
       - name: account_id
         type: integer

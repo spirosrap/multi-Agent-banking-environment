@@ -1,10 +1,13 @@
 {
+  "name": "loan",
+  "description": "Handles loan balance, terms, and payment date requests.",
+  "url": "http://localhost:8000/a2a/loan",
+  "version": "1.0.0",
   "defaultInputModes": ["text/plain"],
   "defaultOutputModes": ["text/plain"],
   "capabilities": {
     "streaming": false,
     "functions": true
   },
-  "skills": [
-  ]
+  "skills": []
 }

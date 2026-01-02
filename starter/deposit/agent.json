@@ -1,10 +1,13 @@
 {
+  "name": "deposit",
+  "description": "Handles deposit account balance and transaction requests.",
+  "url": "http://localhost:8000/a2a/deposit",
+  "version": "1.0.0",
   "defaultInputModes": ["text/plain"],
   "defaultOutputModes": ["text/plain"],
   "capabilities": {
     "streaming": false,
     "functions": true
   },
-  "skills": [
-  ]
+  "skills": []
 }

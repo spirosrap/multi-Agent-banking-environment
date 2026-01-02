@@ -15,12 +15,21 @@ with open(instruction_file_path, "r") as f:
   instruction = f.read()
 
 # Set up the tools that we will be using for the root agent
-tools=[
-]
+tools = []
 
 # Set up other agents that we can delegate to
-sub_agents=[
-  # TODO: Add sub-agents
+deposit_agent_url = os.environ.get(
+  "DEPOSIT_AGENT_URL",
+  f"http://localhost:8000/a2a/deposit{AGENT_CARD_WELL_KNOWN_PATH}",
+)
+loan_agent_url = os.environ.get(
+  "LOAN_AGENT_URL",
+  f"http://localhost:8000/a2a/loan{AGENT_CARD_WELL_KNOWN_PATH}",
+)
+
+sub_agents = [
+  RemoteA2aAgent(name="deposit_agent", agent_card=deposit_agent_url),
+  RemoteA2aAgent(name="loan_agent", agent_card=loan_agent_url),
 ]
 
 # Use the Gemini 2.5 Flash model since it performs quickly
@@ -28,4 +37,10 @@ sub_agents=[
 model = "gemini-2.5-flash"
 
 # Create our agent
-root_agent = # TODO: Implement root agent
+root_agent = Agent(
+  name="manager_agent",
+  model=model,
+  instruction=instruction,
+  tools=tools,
+  sub_agents=sub_agents,
+)
