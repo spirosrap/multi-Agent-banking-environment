@@ -22,3 +22,11 @@ Thumbs.db
 # Logs / misc
 *.log
 
+# Environment files (don't commit secrets)
+.env
+.env.*
+!.env-sample
+
+# PIDs
+*.pid
+
