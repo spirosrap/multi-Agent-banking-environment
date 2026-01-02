@@ -8,4 +8,57 @@ sources:
     password: ${MYSQL_PASSWORD}
 
 tools:
-  # TODO
+  get_outstanding_balances_by_customer:
+    kind: mysql-sql
+    source: loan
+    description: |
+      Get outstanding loan balances for a customer ID.
+      Example:
+      {
+          "customer_id": 1
+      }
+    statement: |
+      SELECT id, loan_type, outstanding_balance
+      FROM loans
+      WHERE customer_id = ?
+      ORDER BY id
+    parameters:
+      - name: customer_id
+        type: integer
+        description: Customer ID to look up.
+
+  get_loan_terms_by_id:
+    kind: mysql-sql
+    source: loan
+    description: |
+      Get loan terms and details for a specific loan ID.
+      Example:
+      {
+          "loan_id": 1
+      }
+    statement: |
+      SELECT id, loan_type, origination_date, amount, terms, monthly_payment
+      FROM loans
+      WHERE id = ?
+    parameters:
+      - name: loan_id
+        type: integer
+        description: Loan ID to look up.
+
+  get_next_payment_date_by_id:
+    kind: mysql-sql
+    source: loan
+    description: |
+      Get the next payment date for a specific loan ID.
+      Example:
+      {
+          "loan_id": 1
+      }
+    statement: |
+      SELECT id, next_payment_date
+      FROM loans
+      WHERE id = ?
+    parameters:
+      - name: loan_id
+        type: integer
+        description: Loan ID to look up.
