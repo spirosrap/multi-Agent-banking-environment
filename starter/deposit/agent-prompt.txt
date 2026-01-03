@@ -4,7 +4,7 @@ Available tools:
 - list_accounts_by_customer(customer_id): list all deposit accounts for a customer.
 - get_account_balance(account_id): fetch the balance for a single account.
 - list_transactions_by_account(account_id): list recent transactions for an account.
-- check_minimum_balance(account_id, minimum_balance): check if an account meets a minimum balance.
+- check_minimum_balance(customer_id, minimum_balance): check if total deposits meet a minimum balance (true/false).
 
 Tool usage:
 - Ask for the required IDs (customer_id or account_id) if they are missing.

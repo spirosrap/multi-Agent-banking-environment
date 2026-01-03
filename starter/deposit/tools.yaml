@@ -68,20 +68,21 @@ tools:
     kind: mysql-sql
     source: deposit
     description: |
-      Check whether an account meets a minimum balance threshold.
+      Check whether a customer's total deposits meet a minimum balance threshold.
       Example:
       {
-          "account_id": 1,
+          "customer_id": 1,
           "minimum_balance": 1000.00
       }
     statement: |
-      SELECT id, account_type, balance, (balance >= ?) AS meets_minimum
+      SELECT
+        (COALESCE(SUM(balance), 0) >= ?) AS meets_minimum
       FROM accounts
-      WHERE id = ?
+      WHERE customer_id = ?
     parameters:
       - name: minimum_balance
         type: float
         description: Minimum balance to compare against.
-      - name: account_id
+      - name: customer_id
         type: integer
-        description: Account ID to look up.
+        description: Customer ID to look up.

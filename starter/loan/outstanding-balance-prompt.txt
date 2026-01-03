@@ -4,7 +4,9 @@ Available tools:
 - get_outstanding_balances_by_customer(customer_id): list outstanding loan balances for a customer.
 
 Tool usage:
+- Use customer_id from state if available (loan_request.customer_id).
 - Ask for customer_id if it is missing.
 - Use the tool to fetch outstanding loans.
-- Summarize the outstanding loans and the total outstanding balance.
-- If no loans are found, say so clearly.
+- Return the structured summary matching the output schema (loan_id, loan_type, outstanding_balance, total_outstanding).
+- If no loans are found, return an empty list and total_outstanding of 0.
+- Return only the JSON object.
