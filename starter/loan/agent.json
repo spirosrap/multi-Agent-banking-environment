@@ -9,5 +9,10 @@
     "streaming": false,
     "functions": true
   },
-  "skills": []
+  "skills": [
+    {
+      "name": "loan-account-lookup",
+      "description": "Fetch loan balances, terms, and next payment dates."
+    }
+  ]
 }

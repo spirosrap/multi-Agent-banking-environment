@@ -9,5 +9,10 @@
     "streaming": false,
     "functions": true
   },
-  "skills": []
+  "skills": [
+    {
+      "name": "request-routing",
+      "description": "Routes customer requests to deposit or loan agents."
+    }
+  ]
 }

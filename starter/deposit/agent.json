@@ -9,5 +9,10 @@
     "streaming": false,
     "functions": true
   },
-  "skills": []
+  "skills": [
+    {
+      "name": "deposit-account-lookup",
+      "description": "Fetch deposit account balances and recent transactions."
+    }
+  ]
 }
