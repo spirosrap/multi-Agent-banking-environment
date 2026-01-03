@@ -1,10 +1,10 @@
 msg-001-1,I can help you with that. I'll need the account ID for your vacation account.
 msg-002-1,"Could you please provide the account ID? If you don't know your account ID, I can list all your accounts if you provide your customer ID."
-msg-002-2,"I can only fetch balances for a specific account ID. Could you please provide the account ID of your primary account? If you don't know your account ID, I can list all your accounts if you provide your customer ID."
+msg-002-2,"I can only fetch balances for a specific account ID. If you don't know the account ID for your primary account, please provide your **customer ID** and I can list all your accounts, from which you might be able to identify your primary account."
 msg-003-1,I can help with that. I'll need your customer ID first.
 msg-004-1,I can help you with that. I'll need your account ID to check for recent payments.
 msg-005-1,"I can help you with that, but I need the `account_id` first. Which account are you referring to?"
-msg-006-1,"I am sorry, I cannot directly add funds to your account. My function is to provide information about your deposit accounts, such as balances, transactions, and account listings. I cannot perform actions like adding or transferring money."
+msg-006-1,"I am sorry, but I cannot directly add funds to your account. My function is to provide information about your deposit accounts, such as balances, transactions, and account listings. I cannot perform actions like adding or transferring money. You would need to do this through online banking, a mobile app, or by visiting a branch."
 msg-007-1,"As a deposit account agent, I can provide you with information about your accounts, such as balances and transactions. However, I cannot directly provide you with cash or transfer funds."
 msg-007-2,"As a deposit account agent, I can provide you with information about your accounts, such as balances and transactions. However, I cannot directly provide you with cash or transfer funds."
 msg-008-1,"400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': ""Function calling with a response mime type: 'application/json' is unsupported"", 'status': 'INVALID_ARGUMENT'}}"
@@ -14,5 +14,5 @@ msg-010-1,"400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': ""Function c
 msg-011-1,"I can help you with that, I'll just need your loan ID please."
 msg-012-1,I can help with that. What is your customer ID?
 msg-013-1,I can help with that. What is your customer ID?
-msg-014-1,"I can help with that. To give you a summary, I need your customer ID. Could you please provide it?"
+msg-014-1,"I can help with that. To give you a summary of your financial situation, I need your customer ID. Could you please provide it?"
 msg-015-1,I can help you with your outstanding loan balances. Please provide your customer ID. I cannot provide total balances across all your accounts.
