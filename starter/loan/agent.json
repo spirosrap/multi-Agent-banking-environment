@@ -11,8 +11,10 @@
   },
   "skills": [
     {
+      "id": "loan-account-lookup",
       "name": "loan-account-lookup",
-      "description": "Fetch loan balances, terms, and next payment dates."
+      "description": "Fetch loan balances, terms, and next payment dates.",
+      "tags": ["loan", "balances", "payments"]
     }
   ]
 }

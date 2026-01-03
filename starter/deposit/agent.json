@@ -11,8 +11,10 @@
   },
   "skills": [
     {
+      "id": "deposit-account-lookup",
       "name": "deposit-account-lookup",
-      "description": "Fetch deposit account balances and recent transactions."
+      "description": "Fetch deposit account balances and recent transactions.",
+      "tags": ["deposit", "accounts", "transactions"]
     }
   ]
 }

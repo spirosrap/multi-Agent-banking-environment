@@ -11,8 +11,10 @@
   },
   "skills": [
     {
+      "id": "request-routing",
       "name": "request-routing",
-      "description": "Routes customer requests to deposit or loan agents."
+      "description": "Routes customer requests to deposit or loan agents.",
+      "tags": ["routing", "manager", "triage"]
     }
   ]
 }
