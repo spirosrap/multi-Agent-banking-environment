@@ -1,7 +1,12 @@
 import io
+import json
 import os
+import uuid
 from typing import AsyncGenerator, Optional, List
 
+import httpx
+from a2a.client import A2AClient
+from a2a.types import Message, MessageSendParams, SendMessageRequest, TextPart
 from pydantic import BaseModel, Field
 from google.adk.agents import SequentialAgent, ParallelAgent, LlmAgent, BaseAgent, InvocationContext
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
@@ -58,6 +63,16 @@ def to_float(value) -> Optional[float]:
     return float(value)
   except (TypeError, ValueError):
     return None
+
+
+def to_serializable(value):
+  if isinstance(value, BaseModel):
+    return value.model_dump()
+  if isinstance(value, dict):
+    return {key: to_serializable(val) for key, val in value.items()}
+  if isinstance(value, list):
+    return [to_serializable(item) for item in value]
+  return value
 
 
 class LoanRequestOutput(BaseModel):
@@ -179,6 +194,171 @@ class MinimumEquityAgent(BaseAgent):
     yield event
 
 
+class EquityCheckAgent(BaseAgent):
+  output_key: str = "equity_check"
+  deposit_agent_url: str
+
+  def __init__(self, name: str, deposit_agent_url: str):
+    super().__init__(name=name, deposit_agent_url=deposit_agent_url)
+
+  def _resolve_base_url(self) -> str:
+    if self.deposit_agent_url.endswith(AGENT_CARD_WELL_KNOWN_PATH):
+      return self.deposit_agent_url[: -len(AGENT_CARD_WELL_KNOWN_PATH)].rstrip("/")
+    return self.deposit_agent_url
+
+  async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
+    state = ctx.session.state
+    loan_request = state.get("loan_request", {})
+    required_equity_state = state.get("required_equity", {})
+
+    customer_id = loan_request.get("customer_id")
+    required_equity = required_equity_state.get("required_equity")
+
+    meets_minimum = False
+    reason = "Equity check could not be completed."
+
+    if customer_id is None or required_equity is None:
+      reason = "Missing customer_id or required_equity for equity check."
+    else:
+      prompt = (
+        "Check whether the customer meets the minimum deposit requirement. "
+        f"Use check_minimum_balance(customer_id={customer_id}, minimum_balance={required_equity}). "
+        "Reply with only true or false (no totals). JSON like "
+        "{\"meets_minimum\": true, \"reason\": \"short explanation\"} is also ok."
+      )
+      try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+          a2a_client = A2AClient(client, url=self._resolve_base_url())
+          message = Message(
+            messageId=str(uuid.uuid4()),
+            role="user",
+            parts=[TextPart(text=prompt)],
+          )
+          request = SendMessageRequest(
+            id=str(uuid.uuid4()),
+            params=MessageSendParams(message=message),
+          )
+          response = await a2a_client.send_message(request)
+
+        text = extract_text_from_a2a_response(response)
+        payload = parse_json_from_text(text) or {}
+        parsed = normalize_bool(payload.get("meets_minimum"))
+        reason = payload.get("reason") or "Equity check completed via deposit agent."
+
+        if parsed is None:
+          parsed = bool_from_text(text)
+
+        if parsed is not None:
+          meets_minimum = parsed
+      except Exception as exc:
+        reason = f"Equity check failed via deposit agent: {exc}"
+
+    payload = {"meets_minimum": meets_minimum, "reason": reason}
+    event = Event(
+      invocation_id=ctx.invocation_id,
+      author=self.name,
+      branch=ctx.branch,
+      content=Content(parts=[Part(text="Completed equity check via deposit agent.")]),
+      actions=EventActions(state_delta={self.output_key: payload}),
+    )
+    yield event
+
+
+def truncate_text(text: str, max_chars: int = 6000) -> str:
+  if not text:
+    return ""
+  return text if len(text) <= max_chars else f"{text[:max_chars]}..."
+
+
+def instruction_with_state(prompt_file: str, builder) -> callable:
+  def _instruction(ctx):
+    base = build_prompt(prompt_file)
+    state = ctx.state or {}
+    extra = builder(state)
+    return f"{base}\n\n{extra}" if extra else base
+  return _instruction
+
+
+def parse_json_from_text(text: str) -> Optional[dict]:
+  if not text:
+    return None
+  stripped = text.strip()
+  try:
+    return json.loads(stripped)
+  except json.JSONDecodeError:
+    start = stripped.find("{")
+    end = stripped.rfind("}")
+    if start != -1 and end != -1 and end > start:
+      try:
+        return json.loads(stripped[start:end + 1])
+      except json.JSONDecodeError:
+        return None
+  return None
+
+
+def normalize_bool(value) -> Optional[bool]:
+  if isinstance(value, bool):
+    return value
+  if isinstance(value, (int, float)):
+    return bool(value)
+  if isinstance(value, str):
+    cleaned = value.strip().lower()
+    if cleaned in ("true", "yes", "y", "1", "pass", "passed", "meets", "met"):
+      return True
+    if cleaned in ("false", "no", "n", "0", "fail", "failed"):
+      return False
+  return None
+
+
+def bool_from_text(text: str) -> Optional[bool]:
+  if not text:
+    return None
+  lower = text.strip().lower()
+  if lower in ("1", "0"):
+    return lower == "1"
+  if "false" in lower or "fail" in lower or "does not meet" in lower or "not meet" in lower:
+    return False
+  if "true" in lower or "pass" in lower or "meets" in lower:
+    return True
+  return None
+
+
+def extract_text_from_parts(parts) -> str:
+  chunks = []
+  for part in parts or []:
+    root = getattr(part, "root", None)
+    if not root:
+      continue
+    kind = getattr(root, "kind", None)
+    if kind == "text":
+      chunks.append(root.text)
+    elif kind == "data":
+      chunks.append(json.dumps(root.data, ensure_ascii=True))
+  return "\n".join(chunks).strip()
+
+
+def extract_text_from_a2a_response(response) -> str:
+  root = getattr(response, "root", None)
+  result = getattr(root, "result", None) if root else None
+  if not result:
+    return ""
+  status = getattr(result, "status", None)
+  if status and getattr(status, "message", None):
+    return extract_text_from_parts(status.message.parts)
+  history = getattr(result, "history", None)
+  if history:
+    return extract_text_from_parts(history[-1].parts)
+  message = result if getattr(result, "parts", None) else None
+  if message:
+    return extract_text_from_parts(message.parts)
+  artifacts = getattr(result, "artifacts", None) or []
+  for artifact in artifacts:
+    text = extract_text_from_parts(getattr(artifact, "parts", None))
+    if text:
+      return text
+  return ""
+
+
 toolbox_url = os.environ.get(
   "LOAN_TOOLBOX_URL",
   os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5001"),
@@ -197,6 +377,36 @@ deposit_agent = RemoteA2aAgent(
   agent_card=deposit_agent_url,
   description="Deposit agent for equity checks.",
 )
+
+def policy_state_builder(state: dict) -> str:
+  loan_request = state.get("loan_request", {})
+  policy_text = state.get("policy_document", {}).get("text", "")
+  payload = {
+    "loan_request": to_serializable(loan_request),
+    "policy_text": truncate_text(policy_text),
+  }
+  return f"Policy evaluation context:\n{json.dumps(payload, ensure_ascii=True, default=str)}"
+
+
+def customer_profile_state_builder(state: dict) -> str:
+  profile_text = state.get("customer_profile_document", {}).get("text", "")
+  payload = {
+    "customer_profile_text": truncate_text(profile_text),
+  }
+  return f"Customer profile context:\n{json.dumps(payload, ensure_ascii=True, default=str)}"
+
+
+def approval_state_builder(state: dict) -> str:
+  payload = {
+    "loan_request": to_serializable(state.get("loan_request")),
+    "outstanding_summary": to_serializable(state.get("outstanding_summary")),
+    "policy_criteria": to_serializable(state.get("policy_criteria")),
+    "customer_profile": to_serializable(state.get("customer_profile")),
+    "equity_check": to_serializable(state.get("equity_check")),
+    "required_equity": to_serializable(state.get("required_equity")),
+  }
+  return f"Decision context:\n{json.dumps(payload, ensure_ascii=True, default=str)}"
+
 
 loan_request_agent = LlmAgent(
   name="loan_request_agent",
@@ -228,7 +438,7 @@ policy_criteria_agent = LlmAgent(
   name="policy_criteria_agent",
   description="Extracts policy criteria from the loan policy document.",
   model=MODEL_NAME,
-  instruction=build_prompt("policy-criteria-prompt.txt"),
+  instruction=instruction_with_state("policy-criteria-prompt.txt", policy_state_builder),
   output_schema=PolicyCriteriaOutput,
   output_key="policy_criteria",
 )
@@ -250,7 +460,7 @@ customer_profile_agent = LlmAgent(
   name="customer_profile_agent",
   description="Evaluates the customer profile from the document.",
   model=MODEL_NAME,
-  instruction=build_prompt("customer-profile-prompt.txt"),
+  instruction=instruction_with_state("customer-profile-prompt.txt", customer_profile_state_builder),
   output_schema=CustomerProfileOutput,
   output_key="customer_profile",
 )
@@ -263,21 +473,16 @@ customer_profile_pipeline = SequentialAgent(
 
 minimum_equity_agent = MinimumEquityAgent(name="minimum_equity_agent")
 
-equity_check_agent = LlmAgent(
+equity_check_agent = EquityCheckAgent(
   name="equity_check_agent",
-  description="Checks deposit equity using the deposit agent.",
-  model=MODEL_NAME,
-  instruction=build_prompt("check-equity-prompt.txt"),
-  sub_agents=[deposit_agent],
-  output_schema=EquityCheckOutput,
-  output_key="equity_check",
+  deposit_agent_url=deposit_agent_url,
 )
 
 approval_report_agent = LlmAgent(
   name="approval_report_agent",
   description="Provides the final loan approval decision.",
   model=MODEL_NAME,
-  instruction=build_prompt("approval-report-prompt.txt"),
+  instruction=instruction_with_state("approval-report-prompt.txt", approval_state_builder),
   output_schema=ApprovalDecisionOutput,
   output_key="approval_decision",
 )

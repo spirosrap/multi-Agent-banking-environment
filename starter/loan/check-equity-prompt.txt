@@ -13,3 +13,4 @@ Instructions:
 - Do not compute or disclose total balances across accounts.
 - Return a JSON response that matches the output schema.
 - Return only the JSON object.
+- You must call the deposit agent before responding.

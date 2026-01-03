@@ -6,7 +6,7 @@ Context:
 
 Instructions:
 - Identify the debt-to-equity ratio requirement for the requested loan type and amount.
-- Identify the minimum customer rating required for that loan.
+- Identify the minimum customer rating required for that loan using one of: Excellent, Great, Good, Fair, Poor.
 - If multiple tiers apply, choose the most specific match based on loan type and amount.
 - Return a JSON object that matches the output schema exactly.
 - Return only the JSON object.

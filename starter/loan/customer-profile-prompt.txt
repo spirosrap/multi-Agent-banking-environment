@@ -4,7 +4,7 @@ Context:
 - The customer profile text is available in state as customer_profile_document.text.
 
 Instructions:
-- Determine the customer's rating (Excellent, Good, Fair, or Poor) based on the profile.
+- Determine the customer's rating using one of: Excellent, Great, Good, Fair, Poor.
 - Provide a brief summary supporting the rating.
 - Return a JSON object that matches the output schema exactly.
 - Return only the JSON object.
