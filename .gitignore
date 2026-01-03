@@ -21,6 +21,7 @@ Thumbs.db
 
 # Logs / misc
 *.log
+.adk/
 
 # Environment files (don't commit secrets)
 .env
@@ -29,4 +30,3 @@ Thumbs.db
 
 # PIDs
 *.pid
-
