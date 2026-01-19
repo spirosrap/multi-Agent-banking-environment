@@ -18,13 +18,19 @@ Interaction flow:
 The loan approval workflow is an orchestrated pipeline that combines sequential and parallel steps and uses structured state outputs:
 
 1. **Loan request parsing**: `loan_request_agent` extracts `customer_id`, `loan_type`, and `loan_amount` into `loan_request`.
-2. **Parallel checks**:
-   - **Outstanding balance**: `outstanding_balance_agent` calls the loan DB tool and stores `outstanding_summary`.
+2. **Outstanding balance (sequential)**: `outstanding_balance_agent` calls the loan DB tool and stores `outstanding_summary`. This must happen before policy evaluation because the policy calculation uses total outstanding debt.
+3. **Parallel checks** (after outstanding balance is available):
    - **Policy evaluation**: `policy_pdf_loader` loads the policy PDF from GCS, then `policy_criteria_agent` extracts `debt_to_equity_ratio` and `min_customer_rating` into `policy_criteria`.
    - **Customer profile evaluation**: `customer_profile_loader` loads the customer profile PDF from GCS, then `customer_profile_agent` extracts `customer_rating` into `customer_profile`.
-3. **Minimum equity calculation**: `minimum_equity_agent` computes required equity from the policy ratio and total debt, writing `required_equity`.
-4. **Equity check via A2A**: `equity_check_agent` calls the deposit agent with `check_minimum_balance` and stores `equity_check`.
-5. **Final decision**: `approval_report_agent` uses all state values and returns a structured `approval_decision` that is customer‑safe and does not reveal policy thresholds or ratings.
+4. **Minimum equity calculation**: `minimum_equity_agent` computes `required_equity` using the policy ratio and total debt:
+   - `total_debt = loan_amount + total_outstanding`
+   - `required_equity = total_debt / debt_to_equity_ratio`
+5. **Equity check via A2A**: `equity_check_agent` calls the deposit agent with `check_minimum_balance(customer_id, required_equity)` and stores `equity_check`.
+6. **Final decision**: `approval_report_agent` evaluates the state values and emits a structured `approval_decision`:
+   - **Equity gate**: approve only if `equity_check.meets_minimum` is true.
+   - **Policy gate**: approve only if `customer_rating` meets or exceeds `min_customer_rating`.
+   - Otherwise, decline with a polite, non‑revealing explanation.
+   A separate final response step converts the decision into customer‑friendly text and explicitly avoids revealing policy thresholds or customer ratings.
 
 All sub‑agents use `output_schema` and `output_key` to keep state structured and machine‑readable.
 
@@ -35,8 +41,11 @@ Evidence files:
 - `testing/loan-approval.png`, `testing/loan-rejection.png`
 
 What the tests show:
-- **Strength**: Guardrails work. The deposit agent refuses to disclose total deposit balances and rejects unauthorized actions (adding funds). The loan workflow produces both approve and decline decisions with final state visible in the UI.
-- **Area for improvement**: The test log shows at least one tool invocation error (`INVALID_ARGUMENT`) during a loan prompt in the manager flow. This indicates the tool/mime-type handling could be hardened or the manager could better detect loan‑approval intents and route to the loan agent without triggering unsupported tool responses.
+- **Strength**: Guardrails work. The deposit agent refuses to disclose total deposit balances and rejects unauthorized actions (adding funds). The loan workflow produces both approve and decline decisions with full state visible in the UI.
+- **Area for improvement**: The test suite originally failed because prompts omitted required IDs (account/customer/loan). The scenarios were updated to include those IDs so the agents can retrieve data directly. This should be expanded with additional realistic edge cases (invalid IDs, missing data, and boundary loan amounts).
+
+Notes on test stability:
+- The earlier tool invocation error during loan flows has been resolved; the current test run completes without tool errors and evaluates the full loan process.
 
 ## Risks and Mitigations
 
