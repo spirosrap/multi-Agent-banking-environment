@@ -108,7 +108,7 @@ Prompt:
  I'd like to get a $700 loan
 
 Response:
- {"decision": "Decline", "reasons": ["We are unable to approve your loan request at this time based on current eligibility requirements."], "next_step": "Please review your financial standing and reapply at a later date, or contact a loan officer to discuss other options."}
+ We are unable to approve your auto loan request at this time based on current eligibility requirements. Please review your financial standing and reapply at a later date, or contact a loan officer to discuss other options.
 
 -----
 
@@ -116,7 +116,7 @@ Prompt:
  I want to buy an off-road 4x4 and my buddy can get a good deal on one.
 
 Response:
- {"decision": "Decline", "reasons": ["We are unable to approve your loan request at this time based on current eligibility requirements."], "next_step": "Please review your financial standing and reapply at a later date, or contact a loan officer to discuss other options."}
+ We are unable to approve your auto loan request at this time based on current eligibility requirements. Please review your financial standing and reapply at a later date, or contact a loan officer to discuss other options.
 
 
 ========================================
@@ -128,7 +128,11 @@ Prompt:
  I'm looking to buy a new house for about $500,000
 
 Response:
- {"decision": "Decline", "reasons": ["Your application does not meet current eligibility requirements.", "The equity requirements for this loan were not satisfied."], "next_step": "We recommend reviewing your financial standing or exploring other loan options. Our financial advisors are available to discuss alternatives."}
+ We regret to inform you that your mortgage loan application for $500,000 has been declined.
+
+Your application does not meet current eligibility requirements, and the equity requirements for this loan were not satisfied.
+
+We recommend reviewing your financial standing or exploring other loan options. Our financial advisors are available to discuss alternatives.
 
 
 ========================================
@@ -140,7 +144,7 @@ Prompt:
  Hey, I think I can get a good deal on a car for $10,000. Can I borrow that much?
 
 Response:
- {"decision": "Decline", "reasons": ["Your customer profile does not align with our current lending criteria.", "The requested loan amount does not meet our equity requirements based on current eligibility requirements."], "next_step": "We recommend reviewing your financial situation and considering reapplying in the future."}
+ I'm sorry, but based on the information from the loan agent, your request to borrow $10,000 has been declined. The reasons provided are: "Your customer profile does not align with our current lending criteria." and "The requested loan amount does not meet our equity requirements based on current eligibility requirements." The next step recommended is to "review your financial situation and considering reapplying in the future."
 
 
 ========================================
@@ -188,7 +192,7 @@ Prompt:
  Give me a summary of my financial situation.
 
 Response:
- I can help with your loan situation. To give you a summary, I need your customer ID. Could you please provide it?
+ I can help with that. To give you a summary of your financial situation, both the deposit and loan agents require your customer ID. Could you please provide it?
 
 
 ========================================

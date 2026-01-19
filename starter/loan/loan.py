@@ -448,6 +448,13 @@ approval_report_agent = LlmAgent(
   output_key="approval_decision",
 )
 
+final_response_agent = LlmAgent(
+  name="final_response_agent",
+  description="Formats the final loan decision for the customer.",
+  model=MODEL_NAME,
+  instruction=build_prompt("final-response-prompt.txt"),
+)
+
 parallel_checks_agent = ParallelAgent(
   name="parallel_checks_agent",
   description="Runs policy and profile checks in parallel.",
@@ -467,5 +474,6 @@ loan_approval_agent = SequentialAgent(
     minimum_equity_agent,
     equity_check_agent,
     approval_report_agent,
+    final_response_agent,
   ],
 )
