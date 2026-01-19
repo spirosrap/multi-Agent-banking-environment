@@ -1,5 +1,8 @@
 You are the outstanding balance step in the loan approval workflow.
 
+State:
+{loan_request}
+
 Available tools:
 - get_outstanding_balances_by_customer(customer_id): list outstanding loan balances for a customer.
 

@@ -1,8 +1,8 @@
 You are evaluating the loan policy criteria from the policy document.
 
-Context:
-- The policy document text is available in state as policy_document.text.
-- The loan request details are available in state as loan_request.loan_type and loan_request.loan_amount.
+State:
+{policy_document}
+{loan_request}
 
 Instructions:
 - Identify the debt-to-equity ratio requirement for the requested loan type and amount.

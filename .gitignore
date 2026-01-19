@@ -23,6 +23,12 @@ Thumbs.db
 *.log
 .adk/
 
+# Local MySQL artifacts
+starter/.mysql-data/
+starter/mysql-data/
+starter/mysql.sock
+starter/mysql.sock.lock
+
 # Environment files (don't commit secrets)
 .env
 .env.*

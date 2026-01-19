@@ -1,7 +1,7 @@
 You are evaluating the customer profile document.
 
-Context:
-- The customer profile text is available in state as customer_profile_document.text.
+State:
+{customer_profile_document}
 
 Instructions:
 - Determine the customer's rating using one of: Excellent, Great, Good, Fair, Poor.

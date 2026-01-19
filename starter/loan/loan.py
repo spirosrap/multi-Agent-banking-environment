@@ -270,15 +270,6 @@ def truncate_text(text: str, max_chars: int = 6000) -> str:
   return text if len(text) <= max_chars else f"{text[:max_chars]}..."
 
 
-def instruction_with_state(prompt_file: str, builder) -> callable:
-  def _instruction(ctx):
-    base = build_prompt(prompt_file)
-    state = ctx.state or {}
-    extra = builder(state)
-    return f"{base}\n\n{extra}" if extra else base
-  return _instruction
-
-
 def parse_json_from_text(text: str) -> Optional[dict]:
   if not text:
     return None
@@ -378,36 +369,6 @@ deposit_agent = RemoteA2aAgent(
   description="Deposit agent for equity checks.",
 )
 
-def policy_state_builder(state: dict) -> str:
-  loan_request = state.get("loan_request", {})
-  policy_text = state.get("policy_document", {}).get("text", "")
-  payload = {
-    "loan_request": to_serializable(loan_request),
-    "policy_text": truncate_text(policy_text),
-  }
-  return f"Policy evaluation context:\n{json.dumps(payload, ensure_ascii=True, default=str)}"
-
-
-def customer_profile_state_builder(state: dict) -> str:
-  profile_text = state.get("customer_profile_document", {}).get("text", "")
-  payload = {
-    "customer_profile_text": truncate_text(profile_text),
-  }
-  return f"Customer profile context:\n{json.dumps(payload, ensure_ascii=True, default=str)}"
-
-
-def approval_state_builder(state: dict) -> str:
-  payload = {
-    "loan_request": to_serializable(state.get("loan_request")),
-    "outstanding_summary": to_serializable(state.get("outstanding_summary")),
-    "policy_criteria": to_serializable(state.get("policy_criteria")),
-    "customer_profile": to_serializable(state.get("customer_profile")),
-    "equity_check": to_serializable(state.get("equity_check")),
-    "required_equity": to_serializable(state.get("required_equity")),
-  }
-  return f"Decision context:\n{json.dumps(payload, ensure_ascii=True, default=str)}"
-
-
 loan_request_agent = LlmAgent(
   name="loan_request_agent",
   description="Collects loan request details.",
@@ -438,7 +399,7 @@ policy_criteria_agent = LlmAgent(
   name="policy_criteria_agent",
   description="Extracts policy criteria from the loan policy document.",
   model=MODEL_NAME,
-  instruction=instruction_with_state("policy-criteria-prompt.txt", policy_state_builder),
+  instruction=build_prompt("policy-criteria-prompt.txt"),
   output_schema=PolicyCriteriaOutput,
   output_key="policy_criteria",
 )
@@ -460,7 +421,7 @@ customer_profile_agent = LlmAgent(
   name="customer_profile_agent",
   description="Evaluates the customer profile from the document.",
   model=MODEL_NAME,
-  instruction=instruction_with_state("customer-profile-prompt.txt", customer_profile_state_builder),
+  instruction=build_prompt("customer-profile-prompt.txt"),
   output_schema=CustomerProfileOutput,
   output_key="customer_profile",
 )
@@ -482,16 +443,15 @@ approval_report_agent = LlmAgent(
   name="approval_report_agent",
   description="Provides the final loan approval decision.",
   model=MODEL_NAME,
-  instruction=instruction_with_state("approval-report-prompt.txt", approval_state_builder),
+  instruction=build_prompt("approval-report-prompt.txt"),
   output_schema=ApprovalDecisionOutput,
   output_key="approval_decision",
 )
 
 parallel_checks_agent = ParallelAgent(
   name="parallel_checks_agent",
-  description="Runs balance, policy, and profile checks in parallel.",
+  description="Runs policy and profile checks in parallel.",
   sub_agents=[
-    outstanding_balance_agent,
     policy_evaluation_agent,
     customer_profile_pipeline,
   ],
@@ -502,6 +462,7 @@ loan_approval_agent = SequentialAgent(
   description="Runs the loan approval workflow end-to-end.",
   sub_agents=[
     loan_request_agent,
+    outstanding_balance_agent,
     parallel_checks_agent,
     minimum_equity_agent,
     equity_check_agent,

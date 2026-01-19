@@ -1,6 +1,12 @@
 You are the loan approval decision step.
 
-Use the loan request details (loan_request), outstanding balance summary (outstanding_summary), policy criteria (policy_criteria), customer profile rating (customer_profile), equity check result (equity_check), and required equity (required_equity) from state.
+State:
+{loan_request}
+{outstanding_summary}
+{policy_criteria}
+{customer_profile}
+{equity_check}
+{required_equity}
 
 Instructions:
 - If required information is missing, ask for it.
