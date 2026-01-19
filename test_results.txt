@@ -5,10 +5,10 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- What is my current balance on the vacation account?
+ What is my current balance on account_id 1 (vacation)?
 
 Response:
- I can help you with that. I'll need the account ID for your vacation account.
+ The current balance for your vacation account (account ID 1) is 1500.00.
 
 
 ========================================
@@ -17,18 +17,18 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- What is my current balance?
+ What is my current balance for account_id 2?
 
 Response:
- Could you please provide the account ID? If you don't know your account ID, I can list all your accounts if you provide your customer ID.
+ Your current balance for account ID 2 (primary account) is 5230.50.
 
 -----
 
 Prompt:
- My primary account
+ Account id 2.
 
 Response:
- I can only fetch balances for a specific account ID. If you don't know the account ID for your primary account, please provide your **customer ID** and I can list all your accounts, from which you might be able to identify your primary account.
+ The current balance for account ID 2 is 5230.50.
 
 
 ========================================
@@ -37,10 +37,10 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- How much do I have on deposit?
+ How much do I have on deposit? My customer_id is 1.
 
 Response:
- I can help with that. I'll need your customer ID first.
+ You have 1500.00 in your vacation account (ID 1) and 5230.50 in your primary account (ID 2).
 
 
 ========================================
@@ -49,10 +49,10 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- What was my most recent payment on my main account?
+ What was my most recent payment on account_id 2 (primary)?
 
 Response:
- I can help you with that. I'll need your account ID to check for recent payments.
+ Your most recent payment on account 2 was -15.25 for Coffee on 2025-09-13.
 
 
 ========================================
@@ -61,10 +61,10 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- How much did I pay the hotel on vacation?
+ How much did I pay the hotel on account_id 1 (vacation)?
 
 Response:
- I can help you with that, but I need the `account_id` first. Which account are you referring to?
+ You paid 200.00 for the hotel on account 1.
 
 
 ========================================
@@ -73,7 +73,7 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- Add $1000 to my vacation account.
+ Add $1000 to account_id 1.
 
 Response:
  I am sorry, but I cannot directly add funds to your account. My function is to provide information about your deposit accounts, such as balances, transactions, and account listings. I cannot perform actions like adding or transferring money. You would need to do this through online banking, a mobile app, or by visiting a branch.
@@ -105,18 +105,18 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- I'd like to get a $700 loan
+ I'd like to get a $700 personal loan. My customer_id is 1.
 
 Response:
- We are unable to approve your auto loan request at this time based on current eligibility requirements. Please review your financial standing and reapply at a later date, or contact a loan officer to discuss other options.
+ We are unable to approve your personal loan request at this time based on current eligibility requirements. Please review your financial standing and reapply at a later date, or contact a loan officer to discuss other options.
 
 -----
 
 Prompt:
- I want to buy an off-road 4x4 and my buddy can get a good deal on one.
+ I want to buy an off-road 4x4 and my buddy can get a good deal on one. My customer_id is 1.
 
 Response:
- We are unable to approve your auto loan request at this time based on current eligibility requirements. Please review your financial standing and reapply at a later date, or contact a loan officer to discuss other options.
+ Your auto loan request has been approved based on current eligibility requirements. A loan officer will contact you shortly to finalize the details.
 
 
 ========================================
@@ -125,7 +125,7 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- I'm looking to buy a new house for about $500,000
+ I'm looking to buy a new house for about $500,000. My customer_id is 1.
 
 Response:
  We regret to inform you that your mortgage loan application for $500,000 has been declined.
@@ -141,10 +141,12 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- Hey, I think I can get a good deal on a car for $10,000. Can I borrow that much?
+ Hey, I think I can get a good deal on a car for $10,000. Can I borrow that much? My customer_id is 1.
 
 Response:
- I'm sorry, but based on the information from the loan agent, your request to borrow $10,000 has been declined. The reasons provided are: "Your customer profile does not align with our current lending criteria." and "The requested loan amount does not meet our equity requirements based on current eligibility requirements." The next step recommended is to "review your financial situation and considering reapplying in the future."
+ We regret to inform you that your car loan request for $10,000 has been declined. This decision is based on your customer profile not aligning with our current lending criteria.
+
+We recommend reviewing your financial situation and considering reapplying in the future.
 
 
 ========================================
@@ -153,10 +155,10 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- When is my next auto payment due?
+ When is my next auto payment due? My loan_id is 1.
 
 Response:
- I can help you with that, I'll just need your loan ID please.
+ Your next auto payment is due on 2025-10-01.
 
 
 ========================================
@@ -165,10 +167,10 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- How much do I still owe on my personal loan?
+ How much do I still owe on my personal loan? My customer_id is 1.
 
 Response:
- I can help with that. What is your customer ID?
+ You owe 10159.25 on your personal loan.
 
 
 ========================================
@@ -177,10 +179,10 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- Do I have any outstanding loans?
+ Do I have any outstanding loans? My customer_id is 1.
 
 Response:
- I can help with that. What is your customer ID?
+ You have 2 outstanding loans: an auto loan with an outstanding balance of 12024.04 and a personal loan with an outstanding balance of 10159.25.
 
 
 ========================================
@@ -189,10 +191,12 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- Give me a summary of my financial situation.
+ Give me a summary of my financial situation. My customer_id is 1.
 
 Response:
- I can help with that. To give you a summary of your financial situation, both the deposit and loan agents require your customer ID. Could you please provide it?
+ Here is a summary of your deposit accounts:
+You have a vacation account with ID 1, with a balance of 1500.00.
+You also have a primary account with ID 2, with a balance of 5230.50.
 
 
 ========================================
@@ -201,8 +205,11 @@ URL: http://localhost:8000/a2a/manager
 ========================================
 
 Prompt:
- What is the total balance across all my accounts and what loans do I have?
+ What is the total balance across all my accounts and what loans do I have? My customer_id is 1.
 
 Response:
- I can help you with your outstanding loan balances. Please provide your customer ID. I cannot provide total balances across all your accounts.
+ Total balances across all accounts are not available.
+You have the following outstanding loans:
+* An auto loan (ID: 1) with an outstanding balance of $12024.04
+* A personal loan (ID: 2) with an outstanding balance of $10159.25
 
